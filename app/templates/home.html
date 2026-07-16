@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-2 mx-4">Dashboard</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mx-3 my-3" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title ">Total Employees</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <a href="/employee/list" class="btn btn-primary">Check</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mx-3 my-3" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title ">Departments</h5>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <a href="/employee/list" class="btn btn-primary">Check</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
