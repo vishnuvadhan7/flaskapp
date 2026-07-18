@@ -21,6 +21,8 @@
       <th scope="col">Name</th>
       <th scope="col">Department</th>
       <th scope="col">Salary</th>
+      <th scope="col">Email</th>
+      <th scope="col">Action</th>
     </tr>
   </thead>
   <tbody>
@@ -29,6 +31,13 @@
       <td>{{emp.name}}</td>
       <td>{{emp.department}}</td>
       <td>{{emp.salary}}</td>
+      <td>{{emp.email}}</td>
+
+      <td>
+        <a href="/employee/employeeDetail/{{emp.id}}" class="btn btn-success"> Detail </a>
+        <a href="/employee/employeeUpdate/{{emp.id}}" class="btn btn-warning"> Edit </a>
+        <a href="/employee/employeeDelete/{{emp.id}}" class="btn btn-danger"> Delete </a>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
