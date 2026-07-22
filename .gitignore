@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask / Database
+instance/
+.sqlite
+*.db
+*.sqlite3
+
+# Configuration with secrets
+config.py          # <-- Your config contains MONGO_URI with password, so we exclude it!
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Miscellaneous
+.DS_Store
+Thumbs.db

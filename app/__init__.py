@@ -1,30 +1,25 @@
-from flask import Flask
+from flask import Flask, redirect, url_for   # <-- add redirect and url_for
 from config import Config
+from flask_pymongo import PyMongo
 
-from app.routes.employee import employee_bp
-from app.routes.department import department_bp
-from app.routes.home import home_bp
-
-from app.models import db
-
-from flask_migrate import Migrate
-
-migrate = Migrate()
+mongo = PyMongo()
 
 def create_app():
-
     app = Flask(__name__)
-
     app.config.from_object(Config)
+    mongo.init_app(app)
 
-    #initialize database
-    db.init_app(app)
+    from app.routes.home import home_bp
+    from app.routes.employee import employee_bp
+    from app.routes.department import department_bp
 
-    #flask migrate
-    migrate.init_app(app,db)
-    
     app.register_blueprint(home_bp)
     app.register_blueprint(employee_bp)
     app.register_blueprint(department_bp)
 
-    return app
+    # Root route – redirect to home page
+    @app.route("/")
+    def index():
+        return redirect(url_for("home.home"))
+
+    return app   # <-- make sure this is inside create_app()

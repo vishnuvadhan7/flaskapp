@@ -1,0 +1,2 @@
+import flask_migrate
+print(flask_migrate.__version__)
