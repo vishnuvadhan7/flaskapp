@@ -1,27 +1,184 @@
 {% extends "base.html" %}
+{% from 'macros.html' import build_query_params %}
+
+{% block title %}Dashboard - Employee Management System{% endblock %}
 
 {% block content %}
-<h2 class="mb-2 mx-4">Dashboard</h2>
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card mx-3 my-3" style="width: 18rem;">
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">
+                <i class="fas fa-chart-line me-2 text-primary"></i>Dashboard
+            </h2>
+            <p class="text-muted mb-0">Welcome back! Here's an overview of your employees.</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row g-4 mb-4">
+        <!-- Total Employees Card -->
+        <div class="col-md-6 col-xl-3 fade-in" style="animation-delay: 0.1s;">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title ">Total Employees</h5>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                    <a href="/employee/list" class="btn btn-primary">Check</a>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted text-uppercase fw-semibold small mb-2">Total Employees</p>
+                            <h2 class="fw-bold text-dark mb-0">{{ total if total else 0 }}</h2>
+                        </div>
+                        <div class="icon-box bg-primary bg-gradient text-white rounded-3">
+                            <i class="fas fa-users fa-lg"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('employee.employee_list') }}" class="btn btn-sm btn-outline-primary mt-3 w-100">
+                        <i class="fas fa-arrow-right me-1"></i> View All
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card mx-3 my-3" style="width: 18rem;">
+        <!-- Departments Card -->
+        <div class="col-md-6 col-xl-3 fade-in" style="animation-delay: 0.2s;">
+            <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title ">Departments</h5>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                    <a href="/employee/list" class="btn btn-primary">Check</a>
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted text-uppercase fw-semibold small mb-2">Departments</p>
+                            <h2 class="fw-bold text-dark mb-0">{{ departments|length if departments else 0 }}</h2>
+                        </div>
+                        <div class="icon-box bg-success bg-gradient text-white rounded-3">
+                            <i class="fas fa-building fa-lg"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('department.departmentHome') }}" class="btn btn-sm btn-outline-success mt-3 w-100">
+                        <i class="fas fa-arrow-right me-1"></i> View Departments
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="col-md-6 col-xl-3 fade-in" style="animation-delay: 0.3s;">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted text-uppercase fw-semibold small mb-2">Quick Actions</p>
+                            <h2 class="fw-bold text-dark mb-0">3</h2>
+                        </div>
+                        <div class="icon-box bg-warning bg-gradient text-white rounded-3">
+                            <i class="fas fa-bolt fa-lg"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ url_for('employee.employeeAdd') }}" class="btn btn-sm btn-primary w-100 mb-2">
+                            <i class="fas fa-user-plus me-1"></i> Add Employee
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Card -->
+        <div class="col-md-6 col-xl-3 fade-in" style="animation-delay: 0.4s;">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted text-uppercase fw-semibold small mb-2">Search</p>
+                            <h2 class="fw-bold text-dark mb-0">Find</h2>
+                        </div>
+                        <div class="icon-box bg-info bg-gradient text-white rounded-3">
+                            <i class="fas fa-search fa-lg"></i>
+                        </div>
+                    </div>
+                    <form method="GET" action="{{ url_for('employee.employee_list') }}" class="mt-3">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="search" class="form-control" placeholder="Search employees...">
+                            <button class="btn btn-info text-white" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Departments Overview -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm fade-in" style="animation-delay: 0.5s;">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="fas fa-building me-2 text-primary"></i>Departments Overview
+                        </h5>
+                        <a href="{{ url_for('department.departmentHome') }}" class="btn btn-sm btn-outline-primary">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if departments %}
+                    <div class="row g-3">
+                        {% for dept in departments[:6] %}
+                        <div class="col-md-4 col-sm-6">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <div class="icon-box-sm bg-primary bg-gradient text-white rounded-2 me-3">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-semibold mb-0">{{ dept }}</h6>
+                                    <small class="text-muted">Department</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No departments found</p>
+                        <a href="{{ url_for('employee.employee_list') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i> Add First Employee
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .icon-box-sm {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .bg-gradient {
+        background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 100%) !important;
+    }
+    
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
 {% endblock %}

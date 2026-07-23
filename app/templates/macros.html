@@ -1,0 +1,11 @@
+{% macro build_query_params(page_num=none, sort_field=none, sort_direction=none, search_text=none, dept_filter=none, min_sal=none, max_sal=none) -%}
+{% set ns = namespace(query=[]) %}
+{% if page_num is not none and page_num != '' and page_num != 1 %}{% set ns.query = ns.query + ['page=' ~ page_num] %}{% endif %}
+{% if sort_field and sort_field != 'name' %}{% set ns.query = ns.query + ['sort_by=' ~ sort_field] %}{% endif %}
+{% if sort_direction and sort_direction != 'asc' %}{% set ns.query = ns.query + ['sort_dir=' ~ sort_direction] %}{% endif %}
+{% if search_text and search_text != '' %}{% set ns.query = ns.query + ['search=' ~ search_text] %}{% endif %}
+{% if dept_filter and dept_filter != '' %}{% set ns.query = ns.query + ['dept=' ~ dept_filter] %}{% endif %}
+{% if min_sal is not none and min_sal != '' %}{% set ns.query = ns.query + ['min_salary=' ~ min_sal] %}{% endif %}
+{% if max_sal is not none and max_sal != '' %}{% set ns.query = ns.query + ['max_salary=' ~ max_sal] %}{% endif %}
+{{ ns.query|join('&') }}
+{%- endmacro %}

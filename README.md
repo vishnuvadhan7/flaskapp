@@ -1,343 +1,285 @@
-# Flask Development 🚀
+# Employee Management System (EMS)
 
-A beginner-friendly Flask development repository containing step-by-step examples for learning Flask, Jinja2 templates, Static Files, SQLAlchemy, Blueprints, Authentication, CRUD operations, File Uploads, and more.
-
-This repository is designed for students and developers who want to master Flask from scratch and build production-ready web applications.
+A full-featured Flask web application for managing employee records with MongoDB database. Built with Bootstrap 5 for a modern, responsive UI.
 
 ---
 
-## 📁 Project Structure
+## Features
 
-```
-Flask-Development/
-│
-├── app/
-│   ├── models/
-│   ├── routes/
-│   ├── templates/
-│   ├── static/
-│   ├── forms/
-│   ├── utils/
-│   └── __init__.py
-│
-├── uploads/
-├── config.py
-├── requirements.txt
-├── run.py
-└── README.md
-```
+### Core Operations
+- **Create** - Add new employees with name, email, password, salary, and department
+- **Read** - View employee list with details and search functionality
+- **Update** - Edit existing employee information
+- **Delete** - Remove employees with confirmation dialog
+
+### Data Management
+- **Pagination** - 5 employees per page with Previous/Next navigation
+- **Search** - Search by name, email, or department (case-insensitive)
+- **Sorting** - Sort by name, email, department, or salary (ascending/descending)
+- **Filtering** - Filter by department dropdown and salary range (min/max)
+
+### User Interface
+- Bootstrap 5 responsive design
+- Flash messages for user feedback (success/error)
+- Sort indicators (▲/▼) on column headers
+- Clean card-based layout
+- Empty state for no results
 
 ---
 
-# 🛠 Prerequisites
+## Technologies Used
 
-- Python 3.11+
-- Git
-- VS Code (Recommended)
+| Category | Technology |
+|----------|------------|
+| Backend | Flask |
+| Database | MongoDB (PyMongo) |
+| Frontend | HTML, CSS, JavaScript |
+| UI Framework | Bootstrap 5 |
+| Icons | Bootstrap Icons |
 
-Check your Python version
+---
 
+## Prerequisites
+
+- **Python** 3.8 or higher
+- **MongoDB** - Local or Atlas cloud instance
+- **Git** - For cloning the repository
+
+Check your Python version:
 ```bash
 python --version
 ```
 
-or
-
-```bash
-python3 --version
-```
-
 ---
 
-# 📥 Clone Repository
+## Installation
 
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/Gagan47raj/Flask-Development.git
-```
-
-Move inside the project
-
-```bash
+git clone <your-repository-url>
 cd Flask-Development
 ```
 
----
+### 2. Create Virtual Environment
 
-# 🐍 Create Virtual Environment
-
-## Windows
-
-```bash
-python -m venv venv
-```
-
-Activate
-
-### Command Prompt
-
+**Windows (CMD):**
 ```cmd
+python -m venv venv
 venv\Scripts\activate
 ```
 
-### PowerShell
-
+**Windows (PowerShell):**
 ```powershell
+python -m venv venv
 venv\Scripts\Activate.ps1
 ```
 
----
-
-## Linux / macOS
-
+**Linux/macOS:**
 ```bash
 python3 -m venv venv
-```
-
-Activate
-
-```bash
 source venv/bin/activate
 ```
 
----
-
-# 📦 Install Dependencies
-
-Upgrade pip
-
+### 3. Install Dependencies
 ```bash
-python -m pip install --upgrade pip
-```
-
-Install required packages
-
-```bash
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
 ---
 
-# ▶️ Run the Flask Application
+## Configuration
 
-Run the application
+Edit `config.py` to configure your MongoDB connection:
 
-```bash
-python run.py
+```python
+class Config:
+    SECRET_KEY = "your-secret-key"
+    
+    # Replace with your MongoDB connection string
+    # For local MongoDB: "mongodb://localhost:27017/employee_db"
+    # For MongoDB Atlas: "mongodb+srv://<username>:<password>@<cluster>/<dbname>?retryWrites=true&w=majority"
+    MONGO_URI = "mongodb+srv://username:password@cluster.mongodb.net/employee_db?retryWrites=true&w=majority"
+    
+    DEBUG = True
 ```
 
-or
+### MongoDB Atlas Setup (Cloud)
+1. Create a free account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+2. Create a cluster (free tier)
+3. Create a database user
+4. Whitelist your IP address (0.0.0.0 for development)
+5. Get your connection string and update `config.py`
 
+---
+
+## Running the Application
+
+```bash
+python app.py
+```
+
+Or with Flask CLI:
 ```bash
 flask run
 ```
 
-Application will start on
+The application will start at: **http://127.0.0.1:5000**
+
+---
+
+## Usage Guide
+
+### Navigation
+- **Home** - Welcome page
+- **Employee List** - View all employees with filters
+- **Add Employee** - Create new employee record
+- **Departments** - View department information
+
+### Search
+Enter a search term in the search box to find employees by:
+- Name
+- Email
+- Department
+
+Example: `/employee/list?search=john`
+
+### Sorting
+Click column headers to sort:
+- Name (A-Z / Z-A)
+- Department (A-Z / Z-A)
+- Salary (Low to High / High to Low)
+- Email (A-Z / Z-A)
+
+Example: `/employee/list?sort_by=salary&sort_dir=desc`
+
+### Filtering
+
+**By Department:**
+Select a department from the dropdown.
+
+Example: `/employee/list?dept=IT`
+
+**By Salary Range:**
+Enter minimum and/or maximum salary values.
+
+Example: `/employee/list?min_salary=50000&max_salary=100000`
+
+### Combining Filters
+All filters work together:
 
 ```
-http://127.0.0.1:5000
+/employee/list?search=john&dept=IT&min_salary=50000&sort_by=salary&sort_dir=desc&page=2
 ```
 
 ---
 
-# 🔄 Deactivate Virtual Environment
+## Project Structure
 
-```bash
-deactivate
+```
+Flask-Development/
+├── app/
+│   ├── models/          # Data models
+│   │   └── employee.py
+│   ├── routes/          # Route handlers (blueprints)
+│   │   ├── employee.py
+│   │   ├── department.py
+│   │   └── home.py
+│   ├── templates/       # HTML templates
+│   │   ├── base.html
+│   │   ├── employee.html
+│   │   ├── macros.html
+│   │   └── ...
+│   ├── static/          # CSS, JS, images
+│   │   ├── css/
+│   │   └── js/
+│   └── utils/           # Utility functions
+├── config.py            # Configuration settings
+├── app.py               # Application entry point
+├── requirements.txt     # Python dependencies
+└── README.md            # This file
 ```
 
 ---
 
-# 📌 Install New Package
+## API Endpoints
 
-```bash
-pip install package_name
-```
-
-Update requirements
-
-```bash
-pip freeze > requirements.txt
-```
-
----
-
-# 🗃 Database Setup
-
-If using Flask SQLAlchemy
-
-Initialize database
-
-```python
-from app.models import db
-
-db.create_all()
-```
-
-Or using Flask Shell
-
-```bash
-flask shell
-```
-
-```python
-from app.models import db
-db.create_all()
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Redirect to home |
+| GET | `/home` | Home page |
+| GET | `/employee/list` | Employee list with filters |
+| GET/POST | `/employee/add` | Add new employee |
+| GET | `/employee/employeeDetail/<id>` | View employee details |
+| GET/POST | `/employee/employeeUpdate/<id>` | Edit employee |
+| GET | `/employee/employeeDelete/<id>` | Delete employee |
+| GET | `/department` | Department page |
 
 ---
 
-# 📂 Environment Variables (Optional)
+## Screenshots
 
-Create a `.env`
-
-```
-SECRET_KEY=your-secret-key
-FLASK_ENV=development
-FLASK_DEBUG=True
-```
-
-Install dotenv
-
-```bash
-pip install python-dotenv
-```
+> Add screenshots here by placing images in the `docs/` folder and referencing them:
+> 
+> ![Employee List](docs/employee-list.png)
+> ![Add Employee](docs/add-employee.png)
 
 ---
 
-# 📚 Topics will be Covered
+## Troubleshooting
 
-- Flask Introduction
-- Routing
-- URL Parameters
-- HTTP Methods
-- Templates (Jinja2)
-- Template Inheritance
-- Static Files
-- Forms
-- WTForms
-- Flash Messages
-- Sessions
-- Cookies
-- Blueprints
-- SQLAlchemy ORM
-- CRUD Operations
-- Authentication
-- File Upload
-- Configuration
-- Error Handling
-- Pagination
-- Flask CLI
-- REST API Basics
+### MongoDB Connection Errors
+- Verify your MONGO_URI in `config.py`
+- Check MongoDB Atlas network access settings
+- Ensure MongoDB service is running (local)
 
----
-
-# 💻 Common Commands
-
-Create virtual environment
-
+### Port Already in Use
 ```bash
-python -m venv venv
+# Find process using port 5000
+netstat -ano | findstr :5000
 ```
 
-Activate
-
-Windows
-
-```cmd
-venv\Scripts\activate
-```
-
-Linux/macOS
-
-```bash
-source venv/bin/activate
-```
-
-Install requirements
-
-```bash
-pip install -r requirements.txt
-```
-
-Run application
-
-```bash
-python run.py
-```
-
-Deactivate
-
-```bash
-deactivate
-```
-
----
-
-# 📦 Generate requirements.txt
-
-```bash
-pip freeze > requirements.txt
-```
-
-Install from requirements
-
+### Import Errors
+Make sure virtual environment is activated and dependencies are installed:
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-# 🔍 Verify Installation
+## Future Enhancements
 
-```bash
-python
-```
-
-```python
-import flask
-print(flask.__version__)
-```
+- [ ] User authentication and login
+- [ ] CSV export functionality
+- [ ] Employee profile pictures
+- [ ] Advanced search with filters
+- [ ] Dashboard with charts
+- [ ] REST API for mobile apps
 
 ---
 
-# 🤝 Contributing
+## License
 
-Contributions are welcome!
-
-1. Fork the repository
-2. Create a new branch
-
-```bash
-git checkout -b feature-name
-```
-
-3. Commit changes
-
-```bash
-git commit -m "Added new feature"
-```
-
-4. Push changes
-
-```bash
-git push origin feature-name
-```
-
-5. Create a Pull Request
+This project is for educational purposes.
 
 ---
 
-# ⭐ Support
+## Author
 
-If this repository helped you learn Flask, consider giving it a ⭐ on GitHub.
+**Your Name**
+- GitHub: [your-github-username]
+- Email: your-email@example.com
 
 ---
 
-# 👨‍💻 Author
+## Acknowledgments
 
-**Gagan Rajput**
+- [Flask Documentation](https://flask.palletsprojects.com/)
+- [MongoDB Documentation](https://docs.mongodb.com/)
+- [Bootstrap 5 Documentation](https://getbootstrap.com/docs/5.3/)
 
-GitHub:
-https://github.com/Gagan47raj
+---
 
-Happy Coding! 🚀
+## Support
+
+If you find this project helpful, please give it a ⭐ on GitHub!

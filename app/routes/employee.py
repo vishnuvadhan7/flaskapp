@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, url_for, render_template
+from flask import Blueprint, request, redirect, url_for, render_template, flash
 from bson.objectid import ObjectId  # for handling MongoDB _id
 from app import mongo  # your PyMongo instance from __init__.py
 
@@ -32,32 +32,110 @@ def register_employee():
 
 # CRUD routes – now using MongoDB
 
-# List all employees
+# List all employees with combined search, filtering, sorting, and pagination
 @employee_bp.route("/employee/list")
 def employee_list():
-    # Get all documents from the 'employees' collection
-    employees_cursor = mongo.db.employees.find()
-    # Convert each document to add an 'id' field
+    PER_PAGE = 5
+    page = request.args.get("page", 1, type=int)
+    search = request.args.get("search", "").strip()
+    dept = request.args.get("dept", "").strip()
+    min_salary = request.args.get("min_salary", type=int)
+    max_salary = request.args.get("max_salary", type=int)
+
+    # Sorting
+    sort_by = request.args.get("sort_by", "name")
+    sort_dir = request.args.get("sort_dir", "asc")
+    allowed_sort_fields = ["name", "email", "department", "salary"]
+
+    if sort_by not in allowed_sort_fields:
+        sort_by = "name"
+    if sort_dir not in ["asc", "desc"]:
+        sort_dir = "asc"
+
+    mongo_sort_dir = 1 if sort_dir == "asc" else -1
+
+    if page < 1:
+        page = 1
+
+    # Get unique departments from database
+    departments = mongo.db.employees.distinct("department")
+    departments = sorted([d for d in departments if d])
+
+    # Build single filter_conditions dictionary with all filters
+    filter_conditions = {}
+
+    # Search filter
+    if search:
+        filter_conditions["$or"] = [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"department": {"$regex": search, "$options": "i"}}
+        ]
+
+    # Department filter
+    if dept:
+        filter_conditions["department"] = dept
+
+    # Salary range filter
+    if min_salary is not None and min_salary >= 0:
+        filter_conditions["salary"] = filter_conditions.get("salary", {})
+        filter_conditions["salary"]["$gte"] = min_salary
+    if max_salary is not None and max_salary >= 0:
+        filter_conditions["salary"] = filter_conditions.get("salary", {})
+        filter_conditions["salary"]["$lte"] = max_salary
+
+    # Get total count for pagination
+    total = mongo.db.employees.count_documents(filter_conditions)
+    total_pages = (total + PER_PAGE - 1) // PER_PAGE
+
+    # Apply filter -> sort -> skip -> limit
+    employees_cursor = (
+        mongo.db.employees.find(filter_conditions)
+        .sort([(sort_by, mongo_sort_dir)])
+        .skip((page - 1) * PER_PAGE)
+        .limit(PER_PAGE)
+    )
     employees = [convert_doc(emp) for emp in employees_cursor]
-    return render_template("employee.html", employees=employees)
+
+    return render_template(
+        "employee.html",
+        employees=employees,
+        page=page,
+        total_pages=total_pages,
+        total=total,
+        per_page=PER_PAGE,
+        search=search,
+        sort_by=sort_by,
+        sort_dir=sort_dir,
+        dept=dept,
+        departments=departments,
+        min_salary=min_salary,
+        max_salary=max_salary
+    )
 
 # Add employee (POST) or show form (GET)
 @employee_bp.route("/employee/add", methods=["POST", "GET"])
 def employeeAdd():
-    if request.method == "POST":
-        # Build the employee document from form data
-        new_employee = {
-            "name": request.form["name"],
-            "email": request.form["email"],
-            "password": request.form["password"],
-            "salary": request.form["salary"],
-            "department": request.form["department"]
-        }
-        # Insert into MongoDB
-        mongo.db.employees.insert_one(new_employee)
-        return redirect(url_for("employee.employee_list"))
+    departments = sorted([d for d in mongo.db.employees.distinct("department") if d])
     
-    return render_template("add_employee.html")
+    if request.method == "POST":
+        try:
+            # Build the employee document from form data
+            new_employee = {
+                "name": request.form["name"],
+                "email": request.form["email"],
+                "password": request.form["password"],
+                "salary": request.form["salary"],
+                "department": request.form["department"]
+            }
+            # Insert into MongoDB
+            mongo.db.employees.insert_one(new_employee)
+            flash("Employee added successfully!", "success")
+            return redirect(url_for("employee.employee_list"))
+        except Exception as e:
+            flash(f"Failed to add employee: {str(e)}", "danger")
+    
+    return render_template("add_employee.html", departments=departments)
 
 # Get a single employee by ID (MongoDB ObjectId)
 @employee_bp.route("/employee/employeeDetail/<id>", methods=["GET"])
@@ -74,35 +152,46 @@ def employeeDetail(id):
 @employee_bp.route("/employee/employeeUpdate/<id>", methods=["POST", "GET"])
 def employeeUpdate(id):
     employee = mongo.db.employees.find_one({"_id": ObjectId(id)})
-    if not employee:
-        return render_template("404.html"), 404
+    departments = sorted([d for d in mongo.db.employees.distinct("department") if d])
     
-    if request.method == "POST":
-        # Update fields
-        update_data = {
-            "name": request.form["name"],
-            "email": request.form["email"],
-            "password": request.form["password"],
-            "salary": request.form["salary"],
-            "department": request.form["department"]
-        }
-        # Update the document
-        mongo.db.employees.update_one(
-            {"_id": ObjectId(id)},
-            {"$set": update_data}
-        )
+    if not employee:
+        flash("Employee not found.", "danger")
         return redirect(url_for("employee.employee_list"))
     
+    if request.method == "POST":
+        try:
+            # Update fields
+            update_data = {
+                "name": request.form["name"],
+                "email": request.form["email"],
+                "password": request.form["password"],
+                "salary": request.form["salary"],
+                "department": request.form["department"]
+            }
+            # Update the document
+            mongo.db.employees.update_one(
+                {"_id": ObjectId(id)},
+                {"$set": update_data}
+            )
+            flash("Employee updated successfully!", "success")
+            return redirect(url_for("employee.employee_list"))
+        except Exception as e:
+            flash(f"Failed to update employee: {str(e)}", "danger")
+    
     employee = convert_doc(employee)
-    return render_template("update_employee.html", employee=employee)
+    return render_template("update_employee.html", employee=employee, departments=departments)
 
 # Delete employee
 @employee_bp.route("/employee/employeeDelete/<id>")
 def employeeDelete(id):
-    result = mongo.db.employees.delete_one({"_id": ObjectId(id)})
-    if result.deleted_count == 0:
-        # No document found – handle gracefully
-        return render_template("404.html"), 404
+    try:
+        result = mongo.db.employees.delete_one({"_id": ObjectId(id)})
+        if result.deleted_count == 0:
+            flash("Employee not found.", "warning")
+            return redirect(url_for("employee.employee_list"))
+        flash("Employee deleted successfully!", "success")
+    except Exception as e:
+        flash(f"Failed to delete employee: {str(e)}", "danger")
     return redirect(url_for("employee.employee_list"))
 
 # ------------------------------------------------------------
